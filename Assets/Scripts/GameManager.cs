@@ -47,15 +47,18 @@ public class GameManager : MonoBehaviour
     // agent found flag
     public void FlagFound(GameObject agent) {
         // TODO: check stuff
+        Debug.Log("got flag!");
         agent.GetComponent<CTFAgent>().SetReward(0.5f);
         agent.GetComponent<CTFAgent>().bringingFlag = true;
         greenFlagController.StartFollowing(agent);
+        agent.GetComponent<CTFAgent>().EndEpisode();  // Finish episode
     }
 
     // agent found flag
     public void EnteredBase(GameObject agent) {
         // TODO: check stuff
         if (agent.GetComponent<CTFAgent>().bringingFlag) {  // If the agent is bringing a flag
+            Debug.Log("win!");
             agent.GetComponent<CTFAgent>().SetReward(1.0f);  // Give reward
             agent.GetComponent<CTFAgent>().EndEpisode();  // Finish episode
         }
