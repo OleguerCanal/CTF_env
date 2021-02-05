@@ -1,6 +1,13 @@
 # Ignore everything
 *
 
+# But not these files...
 !.gitignore
-!Assets/Scripts
-!config
+!/Assets
+Assets/*
+!/Assets/Scripts
+!/Assets/Scripts/*
+/Assets/Scripts/*.meta
+
+!/config
+!/config/*
