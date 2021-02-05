@@ -20,7 +20,6 @@ public class BaseController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("triggered");
         if (other.tag == "agent") {
             gameManager.EnteredBase(other.gameObject);
         }
