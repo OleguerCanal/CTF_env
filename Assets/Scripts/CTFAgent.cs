@@ -6,42 +6,43 @@ using Unity.MLAgents.Sensors;
 
 public class CTFAgent : Agent
 {
-    public Transform Target;
-    public float timeLimit;
-
+    private GameManager gameManager; // GameManager associated with this TrainingArea
     private Rigidbody rBody;
-    private float episodeBeginTime;
+
+    public bool bringingFlag = false;
 
     void Start ()
     {
         rBody = GetComponent<Rigidbody>();
+        gameManager = transform.parent.gameObject.GetComponent<GameManager>();
     }
 
     public override void OnEpisodeBegin()
     {
-        int target_radius = 12;
-        int player_radius = 12;
-
-        // Move the target to a new spot
-        Target.localPosition = new Vector3(Random.value * target_radius - target_radius/2,
-                                           1.0f,
-                                           Random.value * target_radius - target_radius/2);
-        transform.localPosition = new Vector3(Random.value * player_radius - player_radius/2,
-                                            1.0f,
-                                            Random.value * player_radius - player_radius/2);
-
-        episodeBeginTime = Time.time;
+        gameManager.ResetGame();
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        // Target and Agent positions
-        sensor.AddObservation(Target.localPosition.x - this.transform.localPosition.x);
-        sensor.AddObservation(Target.localPosition.z - this.transform.localPosition.z);
+        // Flag relative position
+        sensor.AddObservation(gameManager.greenFlag.transform.localPosition.x - this.transform.localPosition.x);
+        sensor.AddObservation(gameManager.greenFlag.transform.localPosition.z - this.transform.localPosition.z);
+
+        // Base relative position
+        sensor.AddObservation(gameManager.blueBase.transform.localPosition.x - this.transform.localPosition.x);
+        sensor.AddObservation(gameManager.blueBase.transform.localPosition.z - this.transform.localPosition.z);
 
         // Agent velocity
-        sensor.AddObservation(rBody.velocity.x);
-        sensor.AddObservation(rBody.velocity.z);
+        // sensor.AddObservation(rBody.velocity.x); // TODO: transform to local coordinates
+        // sensor.AddObservation(rBody.velocity.z);
+
+        // Bringing flag
+        if (bringingFlag) {
+            sensor.AddObservation(1);
+        }
+        else {
+            sensor.AddObservation(0);
+        }
     }
 
     public float forceMultiplier = 0.1f;
@@ -53,22 +54,7 @@ public class CTFAgent : Agent
                                             vectorAction[1]);
         rBody.AddForce(controlSignal * forceMultiplier, ForceMode.VelocityChange);
 
-        // Rewards
-        float distanceToTarget = Vector3.Distance(this.transform.localPosition, Target.localPosition);
-
-        // Reached target
-        if (distanceToTarget < 1.0f)
-        {
-            SetReward(1.0f);
-            EndEpisode();
-        }
-
-        // Time limit
-        if (Time.time - episodeBeginTime > timeLimit)
-        {
-            EndEpisode();
-        }
-
+        // Rewards: Time penalty
         SetReward(-0.01f);
     }
 
