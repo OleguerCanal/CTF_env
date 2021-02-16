@@ -8,13 +8,14 @@ public class CTFAgent : Agent
 {
     private GameManager gameManager; // GameManager associated with this TrainingArea
     private Rigidbody rBody;
-
-    public bool bringingFlag = false;
+    private float time_reward = -0.01f;  // Default value
 
     void Start ()
     {
         rBody = GetComponent<Rigidbody>();
         gameManager = transform.parent.gameObject.GetComponent<GameManager>();
+        time_reward = Academy.Instance.EnvironmentParameters.GetWithDefault("time_reward", time_reward);
+        Debug.Log(time_reward);
     }
 
     public override void OnEpisodeBegin()
@@ -24,25 +25,9 @@ public class CTFAgent : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        // Flag relative position
-        sensor.AddObservation(gameManager.greenFlag.transform.localPosition.x - this.transform.localPosition.x);
-        sensor.AddObservation(gameManager.greenFlag.transform.localPosition.z - this.transform.localPosition.z);
-
-        // Base relative position
-        sensor.AddObservation(gameManager.blueBase.transform.localPosition.x - this.transform.localPosition.x);
-        sensor.AddObservation(gameManager.blueBase.transform.localPosition.z - this.transform.localPosition.z);
-
-        // Agent velocity
-        // sensor.AddObservation(rBody.velocity.x); // TODO: transform to local coordinates
-        // sensor.AddObservation(rBody.velocity.z);
-
-        // Bringing flag
-        if (bringingFlag) {
-            sensor.AddObservation(1);
-        }
-        else {
-            sensor.AddObservation(0);
-        }
+        // FinalGoal relative position
+        sensor.AddObservation(gameManager.finalGoal.transform.localPosition.x - this.transform.localPosition.x);
+        sensor.AddObservation(gameManager.finalGoal.transform.localPosition.z - this.transform.localPosition.z);
     }
 
     public float forceMultiplier = 0.1f;
@@ -53,15 +38,17 @@ public class CTFAgent : Agent
                                             0.0f,
                                             vectorAction[1]);
         rBody.AddForce(controlSignal * forceMultiplier, ForceMode.VelocityChange);
-
-        // Rewards: Time penalty
-        SetReward(-0.01f);
     }
 
     public override void Heuristic(float[] actionsOut)
     {
         actionsOut[0] = -Input.GetAxis("Vertical");
         actionsOut[1] = Input.GetAxis("Horizontal");
+    }
+
+    void Update()
+    {
+        SetReward(time_reward);  // Time penalty
     }
 
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BaseController : MonoBehaviour
+public class FinalGoalController : MonoBehaviour
 {
     private GameManager gameManager; // GameManager associated with this TrainingArea
 
@@ -12,15 +12,10 @@ public class BaseController : MonoBehaviour
         gameManager = transform.parent.gameObject.GetComponent<GameManager>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     private void OnTriggerEnter(Collider other)
     {
         if (other.tag == "agent") {
+            Debug.Log("Done");
             gameManager.EnteredBase(other.gameObject);
         }
     }
