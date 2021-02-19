@@ -56,8 +56,8 @@ public class CTFAgent : Agent
     public override void CollectObservations(VectorSensor sensor)
     {
         // FinalGoal relative position
-        // sensor.AddObservation(gameManager.finalGoal.transform.localPosition.x);
-        // sensor.AddObservation(gameManager.finalGoal.transform.localPosition.z);
+        sensor.AddObservation(gameManager.velocity.x);
+        sensor.AddObservation(gameManager.velocity.z);
     }
 
     public float forceMultiplier = 0.1f;
