@@ -56,26 +56,17 @@ public class CTFAgent : Agent
     public override void CollectObservations(VectorSensor sensor)
     {
         // FinalGoal relative position
-        sensor.AddObservation(gameManager.finalGoal.transform.localPosition.x);
-        sensor.AddObservation(gameManager.finalGoal.transform.localPosition.z);
+        // sensor.AddObservation(gameManager.finalGoal.transform.localPosition.x);
+        // sensor.AddObservation(gameManager.finalGoal.transform.localPosition.z);
     }
 
     public float forceMultiplier = 0.1f;
     public override void OnActionReceived(float[] vectorAction)
     {
-        // Actions, size = 2
         Vector3 controlSignal = new Vector3(vectorAction[0] - 1,
                                             0.0f,
                                             vectorAction[1] - 1);
         rBody.AddForce(controlSignal * forceMultiplier, ForceMode.VelocityChange);
-        frameCounter += 1;
-        if (episodeCounter % logFrequency == 0)
-        {
-            if (frameCounter % 10 == 0)
-            {
-                analyticsLogger.episode.trajectory.Add(this.transform.localPosition);
-            }
-        }
     }
 
     public override void Heuristic(float[] actionsOut)
@@ -93,6 +84,14 @@ public class CTFAgent : Agent
     void Update()
     {
         SetReward(timeReward);  // Time penalty
+        frameCounter += 1;
+        if (episodeCounter % logFrequency == 0)
+        {
+            if (frameCounter % 10 == 0)
+            {
+                analyticsLogger.episode.trajectory.Add(this.transform.localPosition);
+            }
+        }
     }
 
 }
