@@ -14,6 +14,9 @@ behaviors:
       normalize: false
       hidden_units: 128
       num_layers: 2
+      memory:
+        memory_size: 100
+        sequence_length: 50
     reward_signals:
       extrinsic:
         gamma: 0.99
@@ -27,7 +30,7 @@ environment_parameters:
   # Reward shaping
   finishReward: 1.0
   collectableReward: 0.5
-  timeReward: -0.001
+  timeReward: -0.002  # Doing nothing leads to reward -1
 
   # Analytics logging
   # logPath: "Assets/Resources/completionist2.txt"
