@@ -8,47 +8,91 @@ public class CTFAgent : Agent
 {
     private GameManager gameManager; // GameManager associated with this TrainingArea
     private Rigidbody rBody;
-    private float time_reward = -0.01f;  // Default value
+    private float timeReward;  // Default value
+    
+    // Counters
+    private int frameCounter;
+    private int episodeCounter;
+
+    // Logger
+    private Logger analyticsLogger;  // Default value
+    private string logPath = "Assets/Resources/completionist2.txt";
+    private int logFrequency;
 
     void Start ()
     {
         rBody = GetComponent<Rigidbody>();
         gameManager = transform.parent.gameObject.GetComponent<GameManager>();
-        time_reward = Academy.Instance.EnvironmentParameters.GetWithDefault("time_reward", time_reward);
-        Debug.Log(time_reward);
+        timeReward = Academy.Instance.EnvironmentParameters.GetWithDefault("timeReward", -0.01f);
+        logFrequency = (int) Academy.Instance.EnvironmentParameters.GetWithDefault("logFrequency", 10.0f);
+        analyticsLogger = new Logger();
+        episodeCounter = 0;
     }
 
     public override void OnEpisodeBegin()
     {
         gameManager.ResetGame();
+        
+        frameCounter = 0;
+        episodeCounter += 1;
+
+        if (episodeCounter % logFrequency == 0)
+        {
+            analyticsLogger.StartEpisode();
+        }
+    }
+
+    public void OnEpisodeEnd()
+    {
+        Debug.Log(frameCounter);
+        base.EndEpisode(); // Call the Agent.EndEpisode
+        if (episodeCounter % logFrequency == 0)
+        {
+            analyticsLogger.EndEpisode();
+            analyticsLogger.Save(logPath); // Do this with a certain frequency
+        }
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
         // FinalGoal relative position
-        sensor.AddObservation(gameManager.finalGoal.transform.localPosition.x - this.transform.localPosition.x);
-        sensor.AddObservation(gameManager.finalGoal.transform.localPosition.z - this.transform.localPosition.z);
+        sensor.AddObservation(gameManager.finalGoal.transform.localPosition.x);
+        sensor.AddObservation(gameManager.finalGoal.transform.localPosition.z);
     }
 
     public float forceMultiplier = 0.1f;
     public override void OnActionReceived(float[] vectorAction)
     {
         // Actions, size = 2
-        Vector3 controlSignal = new Vector3(vectorAction[0],
+        Vector3 controlSignal = new Vector3(vectorAction[0] - 1,
                                             0.0f,
-                                            vectorAction[1]);
+                                            vectorAction[1] - 1);
         rBody.AddForce(controlSignal * forceMultiplier, ForceMode.VelocityChange);
+        frameCounter += 1;
+        if (episodeCounter % logFrequency == 0)
+        {
+            if (frameCounter % 10 == 0)
+            {
+                analyticsLogger.episode.trajectory.Add(this.transform.localPosition);
+            }
+        }
     }
 
     public override void Heuristic(float[] actionsOut)
     {
-        actionsOut[0] = -Input.GetAxis("Vertical");
-        actionsOut[1] = Input.GetAxis("Horizontal");
+        int vert = 1;
+        int hor = 1;
+        if (-Input.GetAxis("Vertical") > 0.1) vert = 2; 
+        else if (-Input.GetAxis("Vertical") < -0.1) vert = 0;
+        if (Input.GetAxis("Horizontal") > 0.1) hor = 2;
+        else if (Input.GetAxis("Horizontal") < -0.1) hor = 0;
+        actionsOut[0] = vert;
+        actionsOut[1] = hor;
     }
 
     void Update()
     {
-        SetReward(time_reward);  // Time penalty
+        SetReward(timeReward);  // Time penalty
     }
 
 }
