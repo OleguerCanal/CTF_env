@@ -16,8 +16,8 @@ public class GameManager : MonoBehaviour
     private Vector3 agentIntialPose;
     private Vector3 goalInitialPose;
 
-    private float finish_reward = 1.0f;  // Default value
-    private float collectable_reward = 1.0f;  // Default value
+    private float finishReward;  // Default value
+    private float collectableReward;  // Default value
 
     
     // Start is called before the first frame update
@@ -27,8 +27,8 @@ public class GameManager : MonoBehaviour
         agentIntialPose = agent.transform.position;
         goalInitialPose = finalGoal.transform.position;
 
-        finish_reward = Academy.Instance.EnvironmentParameters.GetWithDefault("finish_reward", finish_reward);
-        collectable_reward = Academy.Instance.EnvironmentParameters.GetWithDefault("collectable_reward", collectable_reward);
+        finishReward = Academy.Instance.EnvironmentParameters.GetWithDefault("finishReward", 1.0f);
+        collectableReward = Academy.Instance.EnvironmentParameters.GetWithDefault("collectableReward", 0.5f);
     }
 
     public void ResetGame() {
@@ -50,19 +50,19 @@ public class GameManager : MonoBehaviour
     }
 
     public void EnteredBase(GameObject agent) {
-        agent.GetComponent<CTFAgent>().SetReward(1.0f);  // Give reward
-        agent.GetComponent<CTFAgent>().EndEpisode();  // Finish episode
+        agent.GetComponent<CTFAgent>().SetReward(finishReward);  // Give reward
+        agent.GetComponent<CTFAgent>().OnEpisodeEnd();  // Finish episode
     }
 
     public void CollectedCollectible(GameObject agent) {
-        agent.GetComponent<CTFAgent>().SetReward(1.0f);  // Give reward
+        agent.GetComponent<CTFAgent>().SetReward(collectableReward);  // Give reward
     }
 
     void Update()
     {
         if (Time.time - episodeBeginTime > timeLimit)
         {
-            agent.GetComponent<CTFAgent>().EndEpisode();
+            agent.GetComponent<CTFAgent>().OnEpisodeEnd();
         }
     }
 }
