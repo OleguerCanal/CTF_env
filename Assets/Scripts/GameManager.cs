@@ -9,7 +9,7 @@ public class GameManager : MonoBehaviour
     public GameObject finalGoal;
     public GameObject agent;
     public GameObject collectibleHolder;
-    public int maxFrames = 500;  // Time limit in seconds
+    public int maxFrames = 1000;  // Time limit in seconds
 
     // Private attributes
     private int frameCounter;
@@ -32,11 +32,12 @@ public class GameManager : MonoBehaviour
     }
 
     public void ResetGame() {
-        int targetRadius = 30;
-        int playerRadius = 30;
+        int targetRadius = 1;
+        int playerRadius = 1;
         
-        collectibleHolder.GetComponent<CollectiblesManager>().DestroyCollectibles();
-        collectibleHolder.GetComponent<CollectiblesManager>().InstantiateCollectibles(4, 40);
+        collectibleHolder.GetComponent<CollectiblesManager>().DestroyRandomizedCollectibles();
+        collectibleHolder.GetComponent<CollectiblesManager>().InstantiateCollectibles(0, 40);
+        collectibleHolder.GetComponent<CollectiblesManager>().SetAllCollectiblesActive();
 
         Vector3 goalPoseNoise = new Vector3(Random.value * targetRadius - targetRadius/2,
                                             0.0f,
@@ -48,7 +49,6 @@ public class GameManager : MonoBehaviour
         finalGoal.transform.localPosition = goalInitialPose + goalPoseNoise;
         agent.transform.localPosition = agentIntialPose + agentPoseNoise;
 
-        // collectibleHolder.GetComponent<CollectiblesManager>().SetAllCollectiblesActive();
         frameCounter = 0;
     }
 

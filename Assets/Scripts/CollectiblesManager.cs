@@ -7,13 +7,15 @@ public class CollectiblesManager : MonoBehaviour
     
     public GameObject collectiblePrefab;
 
-    private List<GameObject> collectibles;
+    private List<GameObject> fixedCollectibles;
+    private List<GameObject> randomCollectibles;
     private string collectible_tag = "collectible";
 
     // Start is called before the first frame update
     void Start()
     {
-        collectibles = Utilities.GetChildrenWithTag(gameObject, collectible_tag);
+        fixedCollectibles = Utilities.GetChildrenWithTag(gameObject, collectible_tag);
+        randomCollectibles = new List<GameObject>();
     }
 
     public void InstantiateCollectibles(int n, float radius) 
@@ -24,13 +26,13 @@ public class CollectiblesManager : MonoBehaviour
                                       Random.value * radius - radius/2);
             var instantiatedCollectible = Instantiate(collectiblePrefab, pos, Quaternion.identity);
             instantiatedCollectible.transform.parent = gameObject.transform;
+            randomCollectibles.Add(instantiatedCollectible);
         }
-        collectibles = Utilities.GetChildrenWithTag(gameObject, collectible_tag);
     }
 
-    public void DestroyCollectibles() 
+    public void DestroyRandomizedCollectibles() 
     {
-        foreach (var collectible in collectibles)
+        foreach (var collectible in randomCollectibles)
         {
             Destroy(collectible);
         }
@@ -38,7 +40,7 @@ public class CollectiblesManager : MonoBehaviour
 
     public void SetAllCollectiblesActive()
     {
-        foreach (var collectible in collectibles)
+        foreach (var collectible in fixedCollectibles)
         {
             collectible.SetActive(true);
         }
