@@ -12,7 +12,7 @@ behaviors:
       learning_rate_schedule: linear
     network_settings:
       normalize: false
-      hidden_units: 128
+      hidden_units: 200
       num_layers: 2
       memory:
         memory_size: 100
@@ -30,7 +30,7 @@ environment_parameters:
   # Reward shaping
   finishReward: 1.0
   collectableReward: 0.5
-  timeReward: -0.002  # Doing nothing leads to reward -1
+  timeReward: -0.001  # Doing nothing leads to reward -1
 
   # Analytics logging
   # logPath: "Assets/Resources/completionist2.txt"
