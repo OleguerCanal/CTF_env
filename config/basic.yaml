@@ -28,8 +28,8 @@ behaviors:
 
 environment_parameters:
   # Reward shaping
-  finishReward: 1.0
-  collectableReward: 0.5
+  finishReward: 0.25
+  collectableReward: 1.0
   timeReward: -0.001  # Doing nothing leads to reward -1
 
   # Analytics logging
