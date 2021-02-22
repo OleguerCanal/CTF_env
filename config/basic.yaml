@@ -31,6 +31,8 @@ environment_parameters:
   finishReward: 0.25
   collectableReward: 1.0
   timeReward: -0.001  # Doing nothing leads to reward -1
+  enemyCloseReward: 0.0
+  deathByEnemyReward: -2.0
 
   # Analytics logging
   # logPath: "Assets/Resources/completionist2.txt"
