@@ -61,6 +61,8 @@ public class CTFAgent : Agent
         // FinalGoal relative position
         sensor.AddObservation(rBody.velocity.x);
         sensor.AddObservation(rBody.velocity.z);
+        float time_proportion = 1- ((float) frameCounter)/((float) gameManager.maxFrames);
+        sensor.AddObservation(time_proportion);
     }
 
     public float forceMultiplier = 0.1f;
