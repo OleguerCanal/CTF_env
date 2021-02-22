@@ -16,13 +16,13 @@ behaviors:
       num_layers: 2
       memory:
         memory_size: 150
-        sequence_length: 50
+        sequence_length: 100
     reward_signals:
       extrinsic:
         gamma: 0.99
         strength: 1.0
     max_steps: 20e6 # Steps collected in one training per-behavior
-    time_horizon: 1000 # Steps collected per-agent added to buffer (if shorter than episode value estimate is used)
+    time_horizon: 1000 # Steps collected per-agent added to buffer (if shorter than episode remaining value estimate is used)
     summary_freq: 10000
 
 
