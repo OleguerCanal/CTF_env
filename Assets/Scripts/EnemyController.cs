@@ -5,7 +5,7 @@ using UnityEngine;
 public class EnemyController : MonoBehaviour
 {
     private int radius = 6;
-    private float speed = 0.05f; // Between 0, 1
+    private float speed = 0.03f; // Between 0, 1
     private List<GameObject> agents;
     private Vector3 initialPosition;
     private GameManager gameManager; // GameManager associated with this TrainingArea
