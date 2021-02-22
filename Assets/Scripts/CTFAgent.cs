@@ -8,24 +8,28 @@ public class CTFAgent : Agent
 {
     private GameManager gameManager; // GameManager associated with this TrainingArea
     private Rigidbody rBody;
-    private float timeReward;  // Default value
+    private float timeReward;
+    private float enemyCloseReward;
+    private EnemiesManager enemiesManager;
     
     // Counters
     private int frameCounter;
     private int episodeCounter;
 
     // Logger
-    private Logger analyticsLogger;  // Default value
-    private string logPath = "Assets/Resources/completionist2.txt";
+    // private Logger analyticsLogger;
+    private string logPath = "Assets/Resources/cmplx_completionist.txt";
     private int logFrequency;
 
     void Start ()
     {
         rBody = GetComponent<Rigidbody>();
         gameManager = transform.parent.gameObject.GetComponent<GameManager>();
+        enemiesManager = gameManager.enemiesHolder.GetComponent<EnemiesManager>();
         timeReward = Academy.Instance.EnvironmentParameters.GetWithDefault("timeReward", -0.01f);
-        logFrequency = (int) Academy.Instance.EnvironmentParameters.GetWithDefault("logFrequency", 10.0f);
-        analyticsLogger = new Logger();
+        enemyCloseReward = Academy.Instance.EnvironmentParameters.GetWithDefault("enemyCloseReward", 0.0f);
+        logFrequency = (int) Academy.Instance.EnvironmentParameters.GetWithDefault("logFrequency", 1.0f);
+        // analyticsLogger = new Logger();
         episodeCounter = 0;
     }
 
@@ -36,21 +40,20 @@ public class CTFAgent : Agent
         frameCounter = 0;
         episodeCounter += 1;
 
-        if (episodeCounter % logFrequency == 0)
-        {
-            analyticsLogger.StartEpisode();
-        }
+        // if (episodeCounter % logFrequency == 0)
+        // {
+        //     analyticsLogger.StartEpisode();
+        // }
     }
 
     public void OnEpisodeEnd()
     {
-        Debug.Log(frameCounter);
         base.EndEpisode(); // Call the Agent.EndEpisode
-        if (episodeCounter % logFrequency == 0)
-        {
-            analyticsLogger.EndEpisode();
-            analyticsLogger.Save(logPath); // Do this with a certain frequency
-        }
+        // if (episodeCounter % logFrequency == 0)
+        // {
+        //     analyticsLogger.EndEpisode();
+        //     analyticsLogger.Save(logPath); // Do this with a certain frequency
+        // }
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -84,14 +87,23 @@ public class CTFAgent : Agent
     void Update()
     {
         SetReward(timeReward);  // Time penalty
-        frameCounter += 1;
-        if (episodeCounter % logFrequency == 0)
-        {
-            if (frameCounter % 10 == 0)
+        if (enemyCloseReward != 0.0f) {
+            foreach (GameObject enemy in enemiesManager.enemies)
             {
-                analyticsLogger.episode.trajectory.Add(this.transform.localPosition);
+                if (Vector3.Distance(enemy.transform.position, this.transform.position) < 7.0f) {
+                    Debug.Log("Enemy Close!");
+                    SetReward(enemyCloseReward);
+                }
             }
         }
+        frameCounter += 1;
+        // if (episodeCounter % logFrequency == 0)
+        // {
+        //     if (frameCounter % 5 == 0)
+        //     {
+        //         analyticsLogger.episode.trajectory.Add(this.transform.localPosition);
+        //     }
+        // }
     }
 
 }
