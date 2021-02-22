@@ -7,8 +7,9 @@ using System.IO;
 
 public class LevelAnalysis : MonoBehaviour
 {
-    [Range(1.0f, 9.0f)]
-    public float time = 9.0f;
+
+    [Range(1.0f, 10.0f)]
+    public float time = 10.0f;
 
     public string path = "Assets/Resources/dummy.txt";
 
@@ -18,7 +19,7 @@ public class LevelAnalysis : MonoBehaviour
         None,
         Custom, // Use inputed path
         Efficient,
-        Curious,
+        Completionist,
      }
      public Persona persona;
 
@@ -31,8 +32,8 @@ public class LevelAnalysis : MonoBehaviour
             case Persona.Efficient:
                 path = "Assets/Resources/efficient.txt";
                 break;
-            case Persona.Curious:
-                path = "Assets/Resources/curios.txt";
+            case Persona.Completionist:
+                path = "Assets/Resources/completionist.txt";
                 break;
             default:
                 break;
@@ -46,6 +47,11 @@ public class LevelAnalysis : MonoBehaviour
             float eCount = (float) loggedResult.episodes.Count;
             int minVal = (int) Mathf.Max(0, eCount*(time - 1.0f)/10.0f);
             int maxVal = (int) Mathf.Min(eCount, eCount*(time + 1.0f)/10.0f);
+            if (time == 10.0f)
+            {
+                minVal = 0;
+                maxVal = (int) eCount;
+            }
             for (int e = minVal; e < maxVal; e++)
             {
                 var episode = loggedResult.episodes[e];
