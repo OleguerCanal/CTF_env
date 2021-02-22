@@ -9,16 +9,17 @@ public class GameManager : MonoBehaviour
     public GameObject finalGoal;
     public GameObject agent;
     public GameObject collectibleHolder;
-    public int maxFrames = 1000;  // Time limit in seconds
+    public GameObject enemiesHolder;
+    public int maxFrames = 2500;  // Time limit in seconds
 
     // Private attributes
     private int frameCounter;
     private Vector3 agentIntialPose;
     private Vector3 goalInitialPose;
 
-    private float finishReward;  // Default value
-    private float collectableReward;  // Default value
-
+    private float finishReward;
+    private float collectableReward;
+    private float deathByEnemyReward;
     
     // Start is called before the first frame update
     void Start()
@@ -29,6 +30,7 @@ public class GameManager : MonoBehaviour
 
         finishReward = Academy.Instance.EnvironmentParameters.GetWithDefault("finishReward", 1.0f);
         collectableReward = Academy.Instance.EnvironmentParameters.GetWithDefault("collectableReward", 0.5f);
+        deathByEnemyReward = Academy.Instance.EnvironmentParameters.GetWithDefault("deathByEnemyReward", -2.0f);
     }
 
     public void ResetGame() {
@@ -38,7 +40,8 @@ public class GameManager : MonoBehaviour
         collectibleHolder.GetComponent<CollectiblesManager>().DestroyRandomizedCollectibles();
         collectibleHolder.GetComponent<CollectiblesManager>().InstantiateCollectibles(0, 40);
         collectibleHolder.GetComponent<CollectiblesManager>().SetAllCollectiblesActive();
-
+        enemiesHolder.GetComponent<EnemiesManager>().ResetPositions();
+        
         Vector3 goalPoseNoise = new Vector3(Random.value * targetRadius - targetRadius/2,
                                             0.0f,
                                             Random.value * targetRadius - targetRadius/2);
@@ -59,6 +62,11 @@ public class GameManager : MonoBehaviour
 
     public void CollectedCollectible(GameObject agent) {
         agent.GetComponent<CTFAgent>().SetReward(collectableReward);  // Give reward
+    }
+
+    public void DeathByEnemy(GameObject agent) {
+        agent.GetComponent<CTFAgent>().SetReward(deathByEnemyReward);  // Give reward
+        agent.GetComponent<CTFAgent>().OnEpisodeEnd();  // Finish episode
     }
 
     void Update()
