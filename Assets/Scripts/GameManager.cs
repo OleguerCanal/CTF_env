@@ -10,16 +10,18 @@ public class GameManager : MonoBehaviour
     public GameObject agent;
     public GameObject collectibleHolder;
     public GameObject enemiesHolder;
-    public int maxFrames = 2500;  // Time limit in seconds
+    public int maxFrames = 2000;  // Time limit in seconds
 
     // Private attributes
     private int frameCounter;
     private Vector3 agentIntialPose;
     private Vector3 goalInitialPose;
 
+    // Rewards
     private float finishReward;
     private float collectableReward;
     private float deathByEnemyReward;
+    private float notFinishedReward;
     
     // Start is called before the first frame update
     void Start()
@@ -31,6 +33,7 @@ public class GameManager : MonoBehaviour
         finishReward = Academy.Instance.EnvironmentParameters.GetWithDefault("finishReward", 1.0f);
         collectableReward = Academy.Instance.EnvironmentParameters.GetWithDefault("collectableReward", 0.5f);
         deathByEnemyReward = Academy.Instance.EnvironmentParameters.GetWithDefault("deathByEnemyReward", -2.0f);
+        notFinishedReward = Academy.Instance.EnvironmentParameters.GetWithDefault("notFinishedReward", -1.0f);
     }
 
     public void ResetGame() {
@@ -73,6 +76,7 @@ public class GameManager : MonoBehaviour
     {
         if (frameCounter >= maxFrames)
         {
+            agent.GetComponent<CTFAgent>().SetReward(notFinishedReward);  // Give reward
             agent.GetComponent<CTFAgent>().OnEpisodeEnd();
         }
         frameCounter += 1;
