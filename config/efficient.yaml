@@ -1,0 +1,81 @@
+behaviors:
+  CTFAgentBehavior:
+    trainer_type: ppo
+    hyperparameters:
+      batch_size: 100  # Num experiences in each iteration of gradient descend
+      buffer_size: 6000  # Num experiences to be filled before updating weights
+      learning_rate: 3.0e-4
+      beta: 5.0e-4  # Weight of the entropy: If entropy drops too quickly, increase beta
+      epsilon: 0.2  # How rapidly can the policy change
+      lambd: 0.99
+      num_epoch: 3
+      learning_rate_schedule: linear
+    network_settings:
+      normalize: false
+      hidden_units: 250
+      num_layers: 2
+      memory:
+        memory_size: 150
+        sequence_length: 100
+    reward_signals:
+      extrinsic:
+        gamma: 0.99
+        strength: 1.0
+    max_steps: 30e6 # Steps collected in one training per-behavior
+    time_horizon: 2000 # Steps collected per-agent added to buffer (if shorter than episode remaining value estimate is used)
+    summary_freq: 10000
+
+
+environment_parameters:
+  # Reward
+  finishReward: 1.0
+  notFinishedReward: -0.25
+  timeReward: -0.0005  # Doing nothing leads to reward -1
+  collectableReward: 0.0
+  enemyCloseReward: 0.0
+  deathByEnemyReward: -2.0
+
+  # Enemies velocity
+  enemySpeed:
+    curriculum:
+      - name: FirstLesson
+        completion_criteria:
+          measure: reward
+          behavior: CTFAgentBehavior
+          signal_smoothing: true
+          min_lesson_length: 500
+          threshold: 0.4
+        value: 0.0
+      - name: SecondLesson
+        completion_criteria:
+          measure: reward
+          behavior: CTFAgentBehavior
+          signal_smoothing: true
+          min_lesson_length: 500
+          threshold: 0.4
+          require_reset: true
+        value: 0.005
+      - name: ThirdLesson
+        completion_criteria:
+          measure: reward
+          behavior: CTFAgentBehavior
+          signal_smoothing: true
+          min_lesson_length: 500
+          threshold: 0.4
+          require_reset: true
+        value: 0.01
+      - name: FourthLesson
+        completion_criteria:
+          measure: reward
+          behavior: CTFAgentBehavior
+          signal_smoothing: true
+          min_lesson_length: 500
+          threshold: 0.4
+          require_reset: true
+        value: 0.02
+      - name: LastLesson
+        value: 0.03
+
+  # Analytics logging
+  # logPath: "Assets/Resources/completionist2.txt"
+  logFreq: 10
