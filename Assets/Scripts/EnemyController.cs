@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.MLAgents;
+using Unity.MLAgents.Sensors;
 
 public class EnemyController : MonoBehaviour
 {
     private int radius = 6;
-    private float speed = 0.03f; // Between 0, 1
+    private float speed; // Between 0, 1
     private List<GameObject> agents;
     private Vector3 initialPosition;
     private GameManager gameManager; // GameManager associated with this TrainingArea
@@ -14,6 +16,7 @@ public class EnemyController : MonoBehaviour
     {
         gameManager = transform.parent.parent.gameObject.GetComponent<GameManager>();
         agents = Utilities.GetChildrenWithTag(this.transform.parent.parent.gameObject, "agent");
+        speed = Academy.Instance.EnvironmentParameters.GetWithDefault("enemySpeed", 0.03f);
         initialPosition = this.transform.position;
     }
 
