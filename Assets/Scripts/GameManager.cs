@@ -34,6 +34,7 @@ public class GameManager : MonoBehaviour
         collectableReward = Academy.Instance.EnvironmentParameters.GetWithDefault("collectableReward", 0.5f);
         deathByEnemyReward = Academy.Instance.EnvironmentParameters.GetWithDefault("deathByEnemyReward", -2.0f);
         notFinishedReward = Academy.Instance.EnvironmentParameters.GetWithDefault("notFinishedReward", -1.0f);
+        // Time.timeScale = 3.0f;
     }
 
     public void ResetGame() {
