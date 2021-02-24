@@ -17,8 +17,9 @@ public class CTFAgent : Agent
     private int episodeCounter;
 
     // Logger
-    // private Logger analyticsLogger;
-    private string logPath = "Assets/Resources/cmplx_completionist.txt";
+    private Logger analyticsLogger;
+    public bool log = false;
+    public string logPath = "Assets/Resources/cmplx_completionist.txt";
     private int logFrequency;
 
     void Start ()
@@ -29,7 +30,7 @@ public class CTFAgent : Agent
         timeReward = Academy.Instance.EnvironmentParameters.GetWithDefault("timeReward", -0.01f);
         enemyCloseReward = Academy.Instance.EnvironmentParameters.GetWithDefault("enemyCloseReward", 0.0f);
         logFrequency = (int) Academy.Instance.EnvironmentParameters.GetWithDefault("logFrequency", 1.0f);
-        // analyticsLogger = new Logger();
+        analyticsLogger = new Logger(logPath, logFrequency, log);
         episodeCounter = 0;
     }
 
@@ -39,21 +40,13 @@ public class CTFAgent : Agent
         
         frameCounter = 0;
         episodeCounter += 1;
-
-        // if (episodeCounter % logFrequency == 0)
-        // {
-        //     analyticsLogger.StartEpisode();
-        // }
+        analyticsLogger.StartEpisode(episodeCounter);
     }
 
     public void OnEpisodeEnd()
     {
         base.EndEpisode(); // Call the Agent.EndEpisode
-        // if (episodeCounter % logFrequency == 0)
-        // {
-        //     analyticsLogger.EndEpisode();
-        //     analyticsLogger.Save(logPath); // Do this with a certain frequency
-        // }
+        analyticsLogger.EndEpisode(episodeCounter);
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -99,13 +92,7 @@ public class CTFAgent : Agent
             }
         }
         frameCounter += 1;
-        // if (episodeCounter % logFrequency == 0)
-        // {
-        //     if (frameCounter % 5 == 0)
-        //     {
-        //         analyticsLogger.episode.trajectory.Add(this.transform.localPosition);
-        //     }
-        // }
+        analyticsLogger.AddStep(episodeCounter, frameCounter, this.transform.localPosition);
     }
 
 }
