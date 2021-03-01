@@ -32,36 +32,31 @@ public class Maze : MonoBehaviour
 
     void Start()
     {
-        occupancy = new bool[rows, cols];
-        InstantiateMap();
+        int numWalls = 6;
+        int numCollectibles = 5;
+        int numEnenmies = 3;
+        InstantiateMap(numWalls, numCollectibles, numEnenmies);
 
         Debug.Log(occupancy);
-
-        int numWalls = 5;
-        for (int i = 0; i < numWalls; i++) {
-            Wall wall = new Wall();
-        }
     }
 
-    private void InstantiateMap()
+    private void InstantiateMap(int numWalls, int numCollectibles, int numEnenmies)
     {
-        // Cell position = new Cell(3, 4);
-        // Wall wa = new Wall(position, 40.0f, 45.0f);
-        Wall wa1 = new Wall();
-        Wall wa2 = new Wall();
-        Wall wa3 = new Wall();
-        Wall wa4 = new Wall();
-        walls.Add(wa1);
-        walls.Add(wa2);
-        walls.Add(wa3);
-        walls.Add(wa4);
+        occupancy = new bool[rows, cols];
 
-        foreach (Wall w in walls)
+        // Build walls
+        for (int i = 0; i < numWalls; i++)
         {
+            Wall w = new Wall();
+            walls.Add(w);
             w.InstantiateWall(wallHolder, wallPrefab);
             occupancy = w.markOccupancy();
         }
         printOccupancy();
+
+        // Sample 
+
+        // Get accessible cells
     }
 
     void printOccupancy()
@@ -71,7 +66,7 @@ public class Maze : MonoBehaviour
         {
             for(int j = 0; j < cols; j++)
             {
-                if (occupancy[i, j]) mapstr += "  X  ";
+                if (occupancy[i, j]) mapstr += " X ";
                 else mapstr += "  .  ";
             }
             mapstr += "\n";
@@ -117,40 +112,31 @@ public class Maze : MonoBehaviour
             Cell final = new Cell(cell.x - length*Mathf.Cos(Mathf.PI*theta/180.0f)/2, 
                                 cell.z - length*Mathf.Sin(Mathf.PI*theta/180.0f)/2);
             
-            // Determine sign of for loop
+            // Iterate over rows
+            int sign = (origin.a <= final.a) ? 1 : -1; 
+            int i = origin.a;
+            int j;
+            while (i != final.a)
             {
-                int sign = 1;
-                if (origin.a > final.a)
+                j = (int) (origin.b + (final.b - origin.b)*(i - origin.a)/((float) (final.a - origin.a)));
+                if (Cell.IsValid(i, j))
                 {
-                    sign = -1;
+                    occup[i, j] = true;
                 }
-                int i = origin.a;
-                while (i != final.a)
-                {
-                    int j = (int) (origin.b + (final.b - origin.b)*(i - origin.a)/((float) (final.a - origin.a)));
-                    if (Cell.IsValid(i, j))
-                    {
-                        occup[i, j] = true;
-                    }
-                    i += sign;
-                }
+                i += sign;
             }
+
+            // Iterate over cols
+            sign = (origin.b <= final.b) ? 1 : -1; 
+            j = origin.b;
+            while (j != final.b)
             {
-                int sign = 1;
-                if (origin.b > final.b)
+                i = (int) (origin.a + (final.a - origin.a)*(j - origin.b)/((float) (final.b - origin.b)));
+                if (Cell.IsValid(i, j))
                 {
-                    sign = -1;
+                    occup[i, j] = true;
                 }
-                int j = origin.b;
-                while (j != final.b)
-                {
-                    int i = (int) (origin.a + (final.a - origin.a)*(j - origin.b)/((float) (final.b - origin.b)));
-                    if (Cell.IsValid(i, j))
-                    {
-                        occup[i, j] = true;
-                    }
-                    j += sign;
-                }
+                j += sign;
             }
             return occup;
         }
@@ -161,18 +147,31 @@ public class Cell
 {
     public int a, b;
     public float x, z;
+    public int distance;
 
     // If nothing passed, it randomly picks a valid value
     public Cell()
     {
-        float xPos = UnityEngine.Random.Range(-Maze.mapWidth/2, Maze.mapWidth/2);
-        float zPos = UnityEngine.Random.Range(-Maze.mapHeight/2, Maze.mapHeight/2);
-        SetPos(xPos, zPos);
+        float aCoord, bCoord;
+        do
+        {
+            aCoord = UnityEngine.Random.Range(0, Maze.cols);
+            bCoord = UnityEngine.Random.Range(0, Maze.rows);
+        }
+        while(IsOccupied(aCoord, bCoord))     
+        
+        SetCoord(aCoord, bCoord);
     }
 
     public Cell(int aCoord, int bCoord)
     {
         SetCoord(aCoord, bCoord);
+    }
+
+    public Cell(int aCoord, int bCoord, int distToRoot)
+    {
+        SetCoord(aCoord, bCoord);
+        distance = distToRoot;
     }
 
     public Cell(float xPos, float zPos)
@@ -201,4 +200,8 @@ public class Cell
         return 0 <= aCoord && aCoord < Maze.rows && 0 <= bCoord && bCoord < Maze.cols;
     }
 
+    public static bool IsOccupied(int aCoord, int bCoord)
+    {
+        return IsValid(aCoord, bCoord) && Maze.occupancy[aCoord, bCoord] == 0;
+    }
 }
