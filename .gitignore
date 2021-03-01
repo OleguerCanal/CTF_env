@@ -8,8 +8,8 @@ Assets/*
 !/Assets/Scripts
 !/Assets/Scripts/*
 /Assets/Scripts/*.meta
-!/Assets/Scripts/maze_generation/*
-/Assets/Scripts/maze_generation/*.meta
+!/Assets/Scripts/Environment/*
+/Assets/Scripts/Environment/*.meta
 !/Assets/Scripts/utilities/*
 /Assets/Scripts/utilities/*.meta
 

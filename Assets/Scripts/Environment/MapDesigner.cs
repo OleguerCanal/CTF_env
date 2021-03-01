@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class Maze : MonoBehaviour
+public class MapDesigner
 {
     // World dimensions
     static public int rows = 30;
@@ -11,45 +11,34 @@ public class Maze : MonoBehaviour
     static public float mapHeight = 100;
     static public float mapWidth = 100;
 
-    // Objects
-    public Transform wallHolder;
-    public Transform wallPrefab;
-    public GameObject floor;
-    public Transform agent;
-    public Transform goal;
-    public Transform collectible;
-    public Transform enemy;
-
     // Private members
-    [HideInInspector]
     public static bool[,] occupancy;
     private List<Wall> walls = new List<Wall>();
 
-    // public void Maze(int r, int c) {
-    //     rows = r;
-    //     cols = c;
+    // public MapDesigner(int r, int c, float height, float width)
+    // {
+
     // }
 
-    void Start()
-    {
-        int numWalls = 0;
-        int numCollectibles = 5;
-        int numEnenmies = 3;
-        ElementPositions elems = InstantiateMap(numWalls, numCollectibles, numEnenmies);
-
-        Debug.Log(occupancy);
-    }
-
-    private ElementPositions InstantiateMap(int numWalls, int numCollectibles, int numEnenmies)
+    private MapDescription CreateMap(int numWalls, int numCollectibles, int numEnemies)
     {
         occupancy = new bool[rows, cols];
+        
+        // Mark outer walls as not free
+        for (int i = 0; i < rows; i++) {
+            occupancy[i, 0] = true;
+            occupancy[i, cols-1] = true;
+        }
+        for (int i = 0; i < cols; i++) {
+            occupancy[0, i] = true;
+            occupancy[rows-1, i] = true;
+        }
 
         // Build walls
         for (int i = 0; i < numWalls; i++)
         {
             Wall w = new Wall();
             walls.Add(w);
-            w.InstantiateWall(wallHolder, wallPrefab);
             occupancy = w.markOccupancy();
         }
         printOccupancy();
@@ -62,11 +51,27 @@ public class Maze : MonoBehaviour
         List<Cell> accessibleCells = ComputeAccessibility(root);
         int accessibleCount = accessibleCells.Count;
 
-        // Sample ElementPositions
-        ElementPositions elems = new ElementPositions();
-        elems.startPos = root;
-        elems.finishPos = accessibleCells[UnityEngine.Random.Range(2*accessibleCount/3, accessibleCount)];
-        return elems;
+        // Group map info
+        MapDescription map = new MapDescription();
+        map.startPos = root;
+        map.finishPos = accessibleCells[UnityEngine.Random.Range(2*accessibleCount/3, accessibleCount)];
+        map.walls = walls;
+        
+        // Sample collectibles
+        map.collectiblesPositions = new List<Cell>();
+        for (int i = 0; i < numCollectibles; i++)
+        {
+            map.collectiblesPositions.Add(accessibleCells[UnityEngine.Random.Range(accessibleCount/2, accessibleCount)]);
+        }
+        
+        // Sample enemies
+        map.enemiesPositions = new List<Cell>();
+        for (int i = 0; i < numEnemies; i++)
+        {
+            map.enemiesPositions.Add(accessibleCells[UnityEngine.Random.Range(accessibleCount/2, accessibleCount)]);
+        }
+        
+        return map;
     }
 
     private List<Cell> ComputeAccessibility(Cell root)
@@ -100,24 +105,13 @@ public class Maze : MonoBehaviour
                 }
             }
         }
-        string mapstr = "";
-        for (i = 0; i < rows; i++)
-        {
-            for(int j = 0; j < cols; j++)
-            {
-                if (i == root.a && j == root.b) mapstr += " X "; 
-                else if (visibility[i, j]) mapstr += "  .  ";
-                else mapstr += " 0 ";
-            }
-            mapstr += "\n";
-        }
-        Debug.Log(mapstr);
+        
+        printAccessibility(root, visibility);
 
         return accessibleCells;
     }
 
-
-    void printOccupancy()
+    private void printOccupancy()
     {
         string mapstr = "";
         for (int i = 0; i < rows; i++)
@@ -131,6 +125,22 @@ public class Maze : MonoBehaviour
         }
         Debug.Log(mapstr);
     }
+
+    private void printAccessibility(Cell root, bool[,] visibility)
+    {
+        string mapstr = "";
+        for (i = 0; i < rows; i++)
+        {
+            for(int j = 0; j < cols; j++)
+            {
+                if (i == root.a && j == root.b) mapstr += " X "; 
+                else if (visibility[i, j]) mapstr += "  .  ";
+                else mapstr += " 0 ";
+            }
+            mapstr += "\n";
+        }
+        Debug.Log(mapstr);
+    } 
 
     public class Wall
     {
@@ -153,19 +163,10 @@ public class Maze : MonoBehaviour
             theta = angle;
         }
 
-        public void InstantiateWall(Transform wallHolder, Transform wallPrefab)
-        {
-            Transform instantiatedWall = Instantiate(wallPrefab);
-            instantiatedWall.parent = wallHolder;
-            instantiatedWall.localScale = new Vector3(1, 5, length);
-            instantiatedWall.rotation = Quaternion.Euler(0, 90-theta, 0);
-            instantiatedWall.localPosition = new Vector3(cell.x, 2, cell.z);
-        }
-
         // Returns a bool 2D multi-array considering current wall
         public bool[,] markOccupancy() {
-            bool[,] occup = new bool[Maze.rows, Maze.cols];
-            occup = Maze.occupancy; //NOTE: I hope this performs a deep copy
+            bool[,] occup = new bool[MapDesigner.rows, MapDesigner.cols];
+            occup = MapDesigner.occupancy; //NOTE: I hope this performs a deep copy
             Cell origin = new Cell(cell.x + length*Mathf.Cos(Mathf.PI*theta/180.0f)/2, 
                                 cell.z + length*Mathf.Sin(Mathf.PI*theta/180.0f)/2);
             Cell final = new Cell(cell.x - length*Mathf.Cos(Mathf.PI*theta/180.0f)/2, 
@@ -214,8 +215,8 @@ public class Cell
         int aCoord, bCoord;
         do
         {
-            aCoord = UnityEngine.Random.Range(0, Maze.cols);
-            bCoord = UnityEngine.Random.Range(0, Maze.rows);
+            aCoord = UnityEngine.Random.Range(0, MapDesigner.cols);
+            bCoord = UnityEngine.Random.Range(0, MapDesigner.rows);
         }
         while(IsOccupied(aCoord, bCoord));
         
@@ -242,33 +243,34 @@ public class Cell
     {
         a = aCoord;
         b = bCoord;
-        z = (float) (-aCoord + (Maze.rows/2))*Maze.mapHeight/Maze.rows;
-        x = (float) (bCoord - (Maze.cols/2))*Maze.mapWidth/Maze.cols;
+        z = (float) (-aCoord + (MapDesigner.rows/2))*MapDesigner.mapHeight/MapDesigner.rows;
+        x = (float) (bCoord - (MapDesigner.cols/2))*MapDesigner.mapWidth/MapDesigner.cols;
     }
 
     public void SetPos(float xPos, float zPos)
     {
         x = xPos;
         z = zPos;
-        a = (int) ((Maze.rows/2) - zPos*Maze.rows/Maze.mapHeight);
-        b = (int) ((Maze.cols/2) + xPos*Maze.cols/Maze.mapWidth);
+        a = (int) ((MapDesigner.rows/2) - zPos*MapDesigner.rows/MapDesigner.mapHeight);
+        b = (int) ((MapDesigner.cols/2) + xPos*MapDesigner.cols/MapDesigner.mapWidth);
     }
 
     public static bool IsValid(int aCoord, int bCoord)
     {
-        return 0 <= aCoord && aCoord < Maze.rows && 0 <= bCoord && bCoord < Maze.cols;
+        return 0 <= aCoord && aCoord < MapDesigner.rows && 0 <= bCoord && bCoord < MapDesigner.cols;
     }
 
     public static bool IsOccupied(int aCoord, int bCoord)
     {
-        return !IsValid(aCoord, bCoord) || Maze.occupancy[aCoord, bCoord];
+        return !IsValid(aCoord, bCoord) || MapDesigner.occupancy[aCoord, bCoord];
     }
 }
 
-public class ElementPositions
+public class MapDescription
 {
     public Cell startPos;
     public Cell finishPos;
     public List<Cell> collectiblesPositions;
     public List<Cell> enemiesPositions;
+    public List<Wall> walls;
 }

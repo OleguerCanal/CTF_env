@@ -6,8 +6,9 @@ using Unity.MLAgents;
 public class GameManager : MonoBehaviour
 {
     // Public attributes
-    public GameObject finalGoal;
     public GameObject agent;
+    public GameObject finalGoal;
+    public GameObject wallsHolder;
     public GameObject collectibleHolder;
     public GameObject enemiesHolder;
     public int maxFrames = 2000;  // Time limit in seconds
@@ -22,40 +23,52 @@ public class GameManager : MonoBehaviour
     private float collectableReward;
     private float deathByEnemyReward;
     private float notFinishedReward;
+
+    private WallManager wallManager;
+    private EnemiesManager enemiesManager;
+    private CollectiblesManager collectiblesManager;
     
     // Start is called before the first frame update
     void Start()
     {
-        // Academy.Instance.EnvironmentParameters.GetWithDefault("my_environment_parameter", 0.0f);
-        agentIntialPose = agent.transform.position;
-        goalInitialPose = finalGoal.transform.position;
-
         finishReward = Academy.Instance.EnvironmentParameters.GetWithDefault("finishReward", 1.0f);
         collectableReward = Academy.Instance.EnvironmentParameters.GetWithDefault("collectableReward", 0.5f);
         deathByEnemyReward = Academy.Instance.EnvironmentParameters.GetWithDefault("deathByEnemyReward", -2.0f);
         notFinishedReward = Academy.Instance.EnvironmentParameters.GetWithDefault("notFinishedReward", -1.0f);
         // Time.timeScale = 3.0f;
+
+        wallManager = wallsHolder.GetComponent<WallManager>();
+        enemiesManager = enemiesHolder.GetComponent<EnemiesManager>();
+        collectiblesManager = collectibleHolder.GetComponent<CollectiblesManager>();
+    }
+    
+    public void BuildMap()
+    {
+        int numWalls = 10;
+        int numCollectibles = 5;
+        int numEnenmies = 3;
+        MapDescription map = MapDesigner.CreateMap(numWalls, numCollectibles, numEnenmies);
+        agent.transform.localPosition = new Vector3(map.startPos.x, 0.0f, map.startPos.z);
+        finalGoal.transform.localPosition = new Vector3(map.startPos.x, 0.0f, map.startPos.z);
+        wallManager.InstantiateWalls(map.walls);
+        enemiesManager.InstantiateEnemies(map.enemiesPositions);
+        collectiblesManager.InstantiateCollectibles(map.collectiblesPositions);
     }
 
-    public void ResetGame() {
-        int targetRadius = 1;
-        int playerRadius = 1;
-        
-        collectibleHolder.GetComponent<CollectiblesManager>().DestroyRandomizedCollectibles();
-        collectibleHolder.GetComponent<CollectiblesManager>().InstantiateCollectibles(0, 40);
-        collectibleHolder.GetComponent<CollectiblesManager>().SetAllCollectiblesActive();
-        enemiesHolder.GetComponent<EnemiesManager>().ResetPositions();
-        
-        Vector3 goalPoseNoise = new Vector3(Random.value * targetRadius - targetRadius/2,
-                                            0.0f,
-                                            Random.value * targetRadius - targetRadius/2);
-        Vector3 agentPoseNoise = new Vector3(Random.value * playerRadius - playerRadius/2,
-                                            0.0f,
-                                            Random.value * playerRadius - playerRadius/2);
-                                            
-        finalGoal.transform.localPosition = goalInitialPose + goalPoseNoise;
-        agent.transform.localPosition = agentIntialPose + agentPoseNoise;
+    public void ResetMap()
+    {
+        enemiesManager.ResetEnemyPositions();
+        CollectiblesManager.SetAllCollectiblesActive();
+    }
 
+    public void DestroyMap()
+    {
+        wallManager.DestroyRandomizedWalls();
+        enemiesManager.DestroyRandomizedEnemies();
+    }
+
+    public void ResetGame()
+    {
         frameCounter = 0;
     }
 
