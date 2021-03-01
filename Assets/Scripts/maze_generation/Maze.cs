@@ -32,15 +32,15 @@ public class Maze : MonoBehaviour
 
     void Start()
     {
-        int numWalls = 6;
+        int numWalls = 0;
         int numCollectibles = 5;
         int numEnenmies = 3;
-        InstantiateMap(numWalls, numCollectibles, numEnenmies);
+        ElementPositions elems = InstantiateMap(numWalls, numCollectibles, numEnenmies);
 
         Debug.Log(occupancy);
     }
 
-    private void InstantiateMap(int numWalls, int numCollectibles, int numEnenmies)
+    private ElementPositions InstantiateMap(int numWalls, int numCollectibles, int numEnenmies)
     {
         occupancy = new bool[rows, cols];
 
@@ -55,9 +55,67 @@ public class Maze : MonoBehaviour
         printOccupancy();
 
         // Sample 
+        Cell root = new Cell(); // Random Valid cell
+        root.rootDistance = 0;
 
         // Get accessible cells
+        List<Cell> accessibleCells = ComputeAccessibility(root);
+        int accessibleCount = accessibleCells.Count;
+
+        // Sample ElementPositions
+        ElementPositions elems = new ElementPositions();
+        elems.startPos = root;
+        elems.finishPos = accessibleCells[UnityEngine.Random.Range(2*accessibleCount/3, accessibleCount)];
+        return elems;
     }
+
+    private List<Cell> ComputeAccessibility(Cell root)
+    {
+        List<Cell> accessibleCells = new List<Cell>();
+        Queue<Cell> q = new Queue<Cell>();
+        q.Enqueue(root);
+
+        bool[,] visibility = new bool[rows, cols];
+        visibility[root.a, root.b] = true;
+
+        int[] deltaA = {0, 0, -1, 1};
+        int[] deltaB = {-1, 1, 0, 0};
+        int i, newA, newB; // Avoid re-allocating memory
+        while(q.Count != 0)
+        {
+            Cell c = q.Dequeue();
+            accessibleCells.Add(c);
+
+            // Get neighbors
+            for (i = 0; i < 4; i++)
+            {
+                newA = c.a + deltaA[i];
+                newB = c.b + deltaB[i];
+                // If its valid and hasn't been visited, we add it to the queue
+                if (!Cell.IsOccupied(newA, newB) && !visibility[newA, newB])
+                {
+                    Cell neighbor = new Cell(newA, newB, c.rootDistance + 1);
+                    q.Enqueue(neighbor);
+                    visibility[newA, newB] = true;
+                }
+            }
+        }
+        string mapstr = "";
+        for (i = 0; i < rows; i++)
+        {
+            for(int j = 0; j < cols; j++)
+            {
+                if (i == root.a && j == root.b) mapstr += " X "; 
+                else if (visibility[i, j]) mapstr += "  .  ";
+                else mapstr += " 0 ";
+            }
+            mapstr += "\n";
+        }
+        Debug.Log(mapstr);
+
+        return accessibleCells;
+    }
+
 
     void printOccupancy()
     {
@@ -73,6 +131,7 @@ public class Maze : MonoBehaviour
         }
         Debug.Log(mapstr);
     }
+
     public class Wall
     {
         private Cell cell;
@@ -83,7 +142,7 @@ public class Maze : MonoBehaviour
         public Wall()
         {
             cell = new Cell();
-            length = UnityEngine.Random.Range(10, 50);
+            length = UnityEngine.Random.Range(20, 60);
             theta = UnityEngine.Random.Range(-90, 90);
         }
 
@@ -147,18 +206,18 @@ public class Cell
 {
     public int a, b;
     public float x, z;
-    public int distance;
+    public int rootDistance;
 
     // If nothing passed, it randomly picks a valid value
     public Cell()
     {
-        float aCoord, bCoord;
+        int aCoord, bCoord;
         do
         {
             aCoord = UnityEngine.Random.Range(0, Maze.cols);
             bCoord = UnityEngine.Random.Range(0, Maze.rows);
         }
-        while(IsOccupied(aCoord, bCoord))     
+        while(IsOccupied(aCoord, bCoord));
         
         SetCoord(aCoord, bCoord);
     }
@@ -171,7 +230,7 @@ public class Cell
     public Cell(int aCoord, int bCoord, int distToRoot)
     {
         SetCoord(aCoord, bCoord);
-        distance = distToRoot;
+        rootDistance = distToRoot;
     }
 
     public Cell(float xPos, float zPos)
@@ -202,6 +261,14 @@ public class Cell
 
     public static bool IsOccupied(int aCoord, int bCoord)
     {
-        return IsValid(aCoord, bCoord) && Maze.occupancy[aCoord, bCoord] == 0;
+        return !IsValid(aCoord, bCoord) || Maze.occupancy[aCoord, bCoord];
     }
+}
+
+public class ElementPositions
+{
+    public Cell startPos;
+    public Cell finishPos;
+    public List<Cell> collectiblesPositions;
+    public List<Cell> enemiesPositions;
 }
