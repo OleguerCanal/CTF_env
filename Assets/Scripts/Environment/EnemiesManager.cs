@@ -48,4 +48,23 @@ public class EnemiesManager : MonoBehaviour
         }
     }
 
+    public void EnemyClose(Vector3 pos, float threshold)
+    {
+        foreach (GameObject enemy in fixedEnemies)
+        {
+            if (Vector3.Distance(enemy.transform.position, pos) < threshold)
+            {
+                return true;
+            }
+        }
+        foreach (GameObject enemy in randomizedEnemies)
+        {
+            if (Vector3.Distance(enemy.transform.position, pos) < threshold)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
