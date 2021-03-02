@@ -14,9 +14,9 @@ public class FinalGoalController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "agent") {
-            Debug.Log("Done");
-            gameManager.EnteredBase(other.gameObject);
+        if (other.tag == "agent")
+        {
+            other.GetComponent<CTFAgent>().OnTouchedFinish();
         }
     }
 }

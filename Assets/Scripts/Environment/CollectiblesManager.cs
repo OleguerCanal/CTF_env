@@ -8,22 +8,22 @@ public class CollectiblesManager : MonoBehaviour
     public GameObject collectiblePrefab;
 
     private List<GameObject> fixedCollectibles;
-    private List<GameObject> randomCollectibles;
+    private List<GameObject> randomCollectibles = new List<GameObject>();
 
     void Start()
     {
         fixedCollectibles = Utilities.GetChildrenWithTag(gameObject, "collectible");
-        randomCollectibles = new List<GameObject>();
     }
 
     public void InstantiateCollectibles(List<Cell> collectiblesPositions) 
     {
+        randomCollectibles = new List<GameObject>();
         foreach (Cell c in collectiblesPositions)
         {
-            Transform instantiatedCollectible = Instantiate(collectiblePrefab);
-            instantiatedCollectible.parent = this.transform;  // Should be attached to the enemiesHolder
-            instantiatedCollectible.localPosition = new Vector3(c.x, 1, c.z);
-            randomizedEnemies.Add(instantiatedCollectible);
+            GameObject instantiatedCollectible = Instantiate(collectiblePrefab);
+            instantiatedCollectible.transform.parent = this.transform;  // Should be attached to the collectiblesHolder
+            instantiatedCollectible.transform.localPosition = new Vector3(c.x, 1, c.z);
+            randomCollectibles.Add(instantiatedCollectible);
         }
     }
 

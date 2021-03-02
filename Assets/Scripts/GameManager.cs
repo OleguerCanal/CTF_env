@@ -8,91 +8,97 @@ public class GameManager : MonoBehaviour
     // Public attributes
     public GameObject agent;
     public GameObject finalGoal;
-    public GameObject wallsHolder;
+    public GameObject mapHolder;
     public GameObject collectibleHolder;
     public GameObject enemiesHolder;
-    public int maxFrames = 2000;  // Time limit in seconds
 
     // Private attributes
     private int frameCounter;
     private Vector3 agentIntialPose;
     private Vector3 goalInitialPose;
 
-    // Rewards
-    private float finishReward;
-    private float collectableReward;
-    private float deathByEnemyReward;
-    private float notFinishedReward;
-
+    private MapDesigner mapDesigner;
     private WallManager wallManager;
     private EnemiesManager enemiesManager;
     private CollectiblesManager collectiblesManager;
-    
+
+    private MapDescription map;
+    private List<MapParameters> mapParamDifficulty;
+
     // Start is called before the first frame update
     void Start()
     {
-        finishReward = Academy.Instance.EnvironmentParameters.GetWithDefault("finishReward", 1.0f);
-        collectableReward = Academy.Instance.EnvironmentParameters.GetWithDefault("collectableReward", 0.5f);
-        deathByEnemyReward = Academy.Instance.EnvironmentParameters.GetWithDefault("deathByEnemyReward", -2.0f);
-        notFinishedReward = Academy.Instance.EnvironmentParameters.GetWithDefault("notFinishedReward", -1.0f);
         // Time.timeScale = 3.0f;
-
-        wallManager = wallsHolder.GetComponent<WallManager>();
+        mapDesigner = new MapDesigner();
+        wallManager = mapHolder.transform.Find("WallHolder").GetComponent<WallManager>();
         enemiesManager = enemiesHolder.GetComponent<EnemiesManager>();
         collectiblesManager = collectibleHolder.GetComponent<CollectiblesManager>();
+
+        // Sorted difficulty: walls, collectibles, enemies
+        mapParamDifficulty = new List<MapParameters>();
+        mapParamDifficulty.Add(new MapParameters(0, 1, 0));
+        mapParamDifficulty.Add(new MapParameters(0, 2, 0));
+        mapParamDifficulty.Add(new MapParameters(0, 4, 1));
+        mapParamDifficulty.Add(new MapParameters(2, 4, 1));
+        mapParamDifficulty.Add(new MapParameters(4, 4, 2));
+        mapParamDifficulty.Add(new MapParameters(6, 4, 2));
+        mapParamDifficulty.Add(new MapParameters(10, 4, 2));
+        mapParamDifficulty.Add(new MapParameters(10, 4, 4));
     }
     
-    public void BuildMap()
+    public void BuildMap(int difficulty)
     {
-        int numWalls = 10;
-        int numCollectibles = 5;
-        int numEnenmies = 3;
-        MapDescription map = MapDesigner.CreateMap(numWalls, numCollectibles, numEnenmies);
+        MapDesigner.mapWidth = 70;
+        MapDesigner.mapHeight = 70;
+
+        // mapHolder.transform.Find("Ground").localScale = new Vector3(mapWidth, 1, mapHeight);
+        // mapHolder.transform.Find("WallHolder").transform.Find("Border_1").localScale = new Vector3(1, 5, mapHeight);
+        // mapHolder.transform.Find("WallHolder").transform.Find("Border_1").localPosition = new Vector3(mapWidth/2, 2, 0);
+
+        // mapHolder.transform.Find("WallHolder").transform.Find("Border_2").localScale = new Vector3(1, 5, mapHeight);
+        // mapHolder.transform.Find("WallHolder").transform.Find("Border_2").localPosition = new Vector3(mapWidth/2, 2, 0);
+        
+        // mapHolder.transform.Find("WallHolder").transform.Find("Border_3").localScale = new Vector3(1, 5, mapHeight);
+        // mapHolder.transform.Find("WallHolder").transform.Find("Border_3").localPosition = new Vector3(mapWidth/2, 2, 0);
+
+        // mapHolder.transform.Find("WallHolder").transform.Find("Border_4").localScale = new Vector3(1, 5, mapHeight);
+        // mapHolder.transform.Find("WallHolder").transform.Find("Border_4").localPosition = new Vector3(mapWidth/2, 2, 0);
+
+        MapParameters mapParam = mapParamDifficulty[Mathf.Min(difficulty, mapParamDifficulty.Count - 1)];
+        map = mapDesigner.CreateMap(mapParam.numWalls, mapParam.numCollectibles, mapParam.numEnenmies);
         agent.transform.localPosition = new Vector3(map.startPos.x, 0.0f, map.startPos.z);
-        finalGoal.transform.localPosition = new Vector3(map.startPos.x, 0.0f, map.startPos.z);
+        finalGoal.transform.localPosition = new Vector3(map.finishPos.x, 0.0f, map.finishPos.z);
         wallManager.InstantiateWalls(map.walls);
         enemiesManager.InstantiateEnemies(map.enemiesPositions);
         collectiblesManager.InstantiateCollectibles(map.collectiblesPositions);
+        
     }
 
     public void ResetMap()
     {
+        agent.transform.localPosition = new Vector3(map.startPos.x, 0.0f, map.startPos.z);
         enemiesManager.ResetEnemyPositions();
-        CollectiblesManager.SetAllCollectiblesActive();
+        collectiblesManager.SetAllCollectiblesActive();
     }
 
     public void DestroyMap()
     {
         wallManager.DestroyRandomizedWalls();
         enemiesManager.DestroyRandomizedEnemies();
+        collectiblesManager.DestroyRandomizedCollectibles();
     }
+}
 
-    public void ResetGame()
+public class MapParameters
+{
+    public int numWalls;
+    public int numCollectibles;
+    public int numEnenmies;
+
+    public MapParameters(int nWalls, int nColls, int nEnem)
     {
-        frameCounter = 0;
-    }
-
-    public void EnteredBase(GameObject agent) {
-        agent.GetComponent<CTFAgent>().SetReward(finishReward);  // Give reward
-        agent.GetComponent<CTFAgent>().OnEpisodeEnd();  // Finish episode
-    }
-
-    public void CollectedCollectible(GameObject agent) {
-        agent.GetComponent<CTFAgent>().SetReward(collectableReward);  // Give reward
-    }
-
-    public void DeathByEnemy(GameObject agent) {
-        agent.GetComponent<CTFAgent>().SetReward(deathByEnemyReward);  // Give reward
-        agent.GetComponent<CTFAgent>().OnEpisodeEnd();  // Finish episode
-    }
-
-    void Update()
-    {
-        if (frameCounter >= maxFrames)
-        {
-            agent.GetComponent<CTFAgent>().SetReward(notFinishedReward);  // Give reward
-            agent.GetComponent<CTFAgent>().OnEpisodeEnd();
-        }
-        frameCounter += 1;
+        numWalls = nWalls;
+        numCollectibles = nColls;
+        numEnenmies = nEnem;
     }
 }

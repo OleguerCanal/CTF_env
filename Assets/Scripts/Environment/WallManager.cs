@@ -8,7 +8,7 @@ public class WallManager : MonoBehaviour
 
     public Transform wallPrefab;
 
-    private List<GameObject> randomWalls;
+    private List<GameObject> randomWalls = new List<GameObject>();
 
     public void InstantiateWalls(List<Wall> walls) {
         randomWalls = new List<GameObject>();
@@ -16,10 +16,10 @@ public class WallManager : MonoBehaviour
         {
             Transform instantiatedWall = Instantiate(wallPrefab);
             instantiatedWall.parent = this.transform;  // Should be attached to the wallHolder
-            instantiatedWall.localScale = new Vector3(1, 5, w.length);
+            instantiatedWall.localScale = new Vector3(0.75f, 5, w.length);
             instantiatedWall.rotation = Quaternion.Euler(0, 90 - w.theta, 0);
             instantiatedWall.localPosition = new Vector3(w.cell.x, 2, w.cell.z);
-            randomWalls.Add(instantiatedWall);
+            randomWalls.Add(instantiatedWall.gameObject);
         }
     }
 
@@ -27,7 +27,7 @@ public class WallManager : MonoBehaviour
     {
         foreach (GameObject wall in randomWalls)
         {
-            Destroy(collectible);
+            Destroy(wall);
         }
     }
 }

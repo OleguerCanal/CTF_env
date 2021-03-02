@@ -14,8 +14,7 @@ public class CollectibleController : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (other.tag == "agent") {
-            Debug.Log("Collected collectible!");
-            gameManager.CollectedCollectible(other.gameObject);
+            other.GetComponent<CTFAgent>().OnCollectedCollectible();
             gameObject.SetActive(false);
         }
     }

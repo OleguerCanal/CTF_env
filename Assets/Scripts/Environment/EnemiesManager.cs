@@ -7,21 +7,21 @@ public class EnemiesManager : MonoBehaviour
     public GameObject enemyPrefab;
 
     private List<GameObject> fixedEnemies;
-    private List<GameObject> randomizedEnemies;
+    private List<GameObject> randomizedEnemies = new List<GameObject>();
 
     void Start()
     {
         fixedEnemies = Utilities.GetChildrenWithTag(this.gameObject, "enemy");
-        randomizedEnemies = new List<GameObject>();
     }
 
     public void InstantiateEnemies(List<Cell> enemiesPositions)
     {
+        randomizedEnemies = new List<GameObject>();
         foreach (Cell c in enemiesPositions)
         {
-            Transform instantiatedEnemy = Instantiate(enemyPrefab);
-            instantiatedEnemy.parent = this.transform;  // Should be attached to the enemiesHolder
-            instantiatedEnemy.localPosition = new Vector3(c.x, 1, c.z);
+            GameObject instantiatedEnemy = Instantiate(enemyPrefab);
+            instantiatedEnemy.transform.parent = this.transform;  // Should be attached to the enemiesHolder
+            instantiatedEnemy.transform.localPosition = new Vector3(c.x, 1, c.z);
             randomizedEnemies.Add(instantiatedEnemy);
         }
     }
@@ -48,7 +48,7 @@ public class EnemiesManager : MonoBehaviour
         }
     }
 
-    public void EnemyClose(Vector3 pos, float threshold)
+    public bool EnemyClose(Vector3 pos, float threshold)
     {
         foreach (GameObject enemy in fixedEnemies)
         {

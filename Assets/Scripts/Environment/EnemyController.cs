@@ -39,9 +39,9 @@ public class EnemyController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "agent") {
-            Debug.Log("Enemy killed agent!");
-            gameManager.DeathByEnemy(other.gameObject);
+        if (other.tag == "agent")
+        {
+            other.GetComponent<CTFAgent>().OnTouchedByEnemy();
         }
     }
 

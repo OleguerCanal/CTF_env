@@ -6,21 +6,20 @@ using System;
 public class MapDesigner
 {
     // World dimensions
-    static public int rows = 30;
-    static public int cols = 30;
-    static public float mapHeight = 100;
-    static public float mapWidth = 100;
+    static public int rows = 40;
+    static public int cols = 40;
+    static public float mapHeight = 70;
+    static public float mapWidth = 70;
 
     // Private members
     public static bool[,] occupancy;
-    private List<Wall> walls = new List<Wall>();
 
     // public MapDesigner(int r, int c, float height, float width)
     // {
 
     // }
 
-    private MapDescription CreateMap(int numWalls, int numCollectibles, int numEnemies)
+    public MapDescription CreateMap(int numWalls, int numCollectibles, int numEnemies)
     {
         occupancy = new bool[rows, cols];
         
@@ -35,6 +34,7 @@ public class MapDesigner
         }
 
         // Build walls
+        List<Wall> walls = new List<Wall>();
         for (int i = 0; i < numWalls; i++)
         {
             Wall w = new Wall();
@@ -55,20 +55,25 @@ public class MapDesigner
         MapDescription map = new MapDescription();
         map.startPos = root;
         map.finishPos = accessibleCells[UnityEngine.Random.Range(2*accessibleCount/3, accessibleCount)];
+        accessibleCells.Remove(map.finishPos);
         map.walls = walls;
         
         // Sample collectibles
         map.collectiblesPositions = new List<Cell>();
         for (int i = 0; i < numCollectibles; i++)
         {
-            map.collectiblesPositions.Add(accessibleCells[UnityEngine.Random.Range(accessibleCount/2, accessibleCount)]);
+            Cell collectiblePos = accessibleCells[UnityEngine.Random.Range(accessibleCount/3, accessibleCount)];
+            map.collectiblesPositions.Add(collectiblePos);
+            accessibleCells.Remove(collectiblePos);
         }
         
         // Sample enemies
         map.enemiesPositions = new List<Cell>();
         for (int i = 0; i < numEnemies; i++)
         {
-            map.enemiesPositions.Add(accessibleCells[UnityEngine.Random.Range(accessibleCount/2, accessibleCount)]);
+            Cell enemyPos = accessibleCells[UnityEngine.Random.Range(accessibleCount/3, accessibleCount)];
+            map.enemiesPositions.Add(enemyPos);
+            accessibleCells.Remove(enemyPos);
         }
         
         return map;
@@ -129,7 +134,7 @@ public class MapDesigner
     private void printAccessibility(Cell root, bool[,] visibility)
     {
         string mapstr = "";
-        for (i = 0; i < rows; i++)
+        for (int i = 0; i < rows; i++)
         {
             for(int j = 0; j < cols; j++)
             {
@@ -140,66 +145,6 @@ public class MapDesigner
             mapstr += "\n";
         }
         Debug.Log(mapstr);
-    } 
-
-    public class Wall
-    {
-        private Cell cell;
-        private float length;
-        private float theta;
-
-        // If no arguments passed to the constructor, it sets everything random
-        public Wall()
-        {
-            cell = new Cell();
-            length = UnityEngine.Random.Range(20, 60);
-            theta = UnityEngine.Random.Range(-90, 90);
-        }
-
-        public Wall(Cell loc, float len, float angle)
-        {
-            cell = loc;
-            length = len;
-            theta = angle;
-        }
-
-        // Returns a bool 2D multi-array considering current wall
-        public bool[,] markOccupancy() {
-            bool[,] occup = new bool[MapDesigner.rows, MapDesigner.cols];
-            occup = MapDesigner.occupancy; //NOTE: I hope this performs a deep copy
-            Cell origin = new Cell(cell.x + length*Mathf.Cos(Mathf.PI*theta/180.0f)/2, 
-                                cell.z + length*Mathf.Sin(Mathf.PI*theta/180.0f)/2);
-            Cell final = new Cell(cell.x - length*Mathf.Cos(Mathf.PI*theta/180.0f)/2, 
-                                cell.z - length*Mathf.Sin(Mathf.PI*theta/180.0f)/2);
-            
-            // Iterate over rows
-            int sign = (origin.a <= final.a) ? 1 : -1; 
-            int i = origin.a;
-            int j;
-            while (i != final.a)
-            {
-                j = (int) (origin.b + (final.b - origin.b)*(i - origin.a)/((float) (final.a - origin.a)));
-                if (Cell.IsValid(i, j))
-                {
-                    occup[i, j] = true;
-                }
-                i += sign;
-            }
-
-            // Iterate over cols
-            sign = (origin.b <= final.b) ? 1 : -1; 
-            j = origin.b;
-            while (j != final.b)
-            {
-                i = (int) (origin.a + (final.a - origin.a)*(j - origin.b)/((float) (final.b - origin.b)));
-                if (Cell.IsValid(i, j))
-                {
-                    occup[i, j] = true;
-                }
-                j += sign;
-            }
-            return occup;
-        }
     }
 }
 
@@ -263,6 +208,66 @@ public class Cell
     public static bool IsOccupied(int aCoord, int bCoord)
     {
         return !IsValid(aCoord, bCoord) || MapDesigner.occupancy[aCoord, bCoord];
+    }
+}
+
+public class Wall
+{
+    public Cell cell;
+    public float length;
+    public float theta;
+
+    // If no arguments passed to the constructor, it sets everything random
+    public Wall()
+    {
+        cell = new Cell();
+        length = UnityEngine.Random.Range(10, 40);
+        theta = UnityEngine.Random.Range(-90, 90);
+    }
+
+    public Wall(Cell loc, float len, float angle)
+    {
+        cell = loc;
+        length = len;
+        theta = angle;
+    }
+
+    // Returns a bool 2D multi-array considering current wall
+    public bool[,] markOccupancy() {
+        bool[,] occup = new bool[MapDesigner.rows, MapDesigner.cols];
+        occup = MapDesigner.occupancy; //NOTE: I hope this performs a deep copy
+        Cell origin = new Cell(cell.x + length*Mathf.Cos(Mathf.PI*theta/180.0f)/2, 
+                            cell.z + length*Mathf.Sin(Mathf.PI*theta/180.0f)/2);
+        Cell final = new Cell(cell.x - length*Mathf.Cos(Mathf.PI*theta/180.0f)/2, 
+                            cell.z - length*Mathf.Sin(Mathf.PI*theta/180.0f)/2);
+        
+        // Iterate over rows
+        int sign = (origin.a <= final.a) ? 1 : -1; 
+        int i = origin.a - sign;
+        int j;
+        while (i != final.a + sign)
+        {
+            j = (int) (origin.b + (final.b - origin.b)*(i - origin.a)/((float) (final.a - origin.a)));
+            if (Cell.IsValid(i, j))
+            {
+                occup[i, j] = true;
+            }
+            i += sign;
+        }
+
+        // Iterate over cols
+        sign = (origin.b <= final.b) ? 1 : -1; 
+        j = origin.b - sign;
+        while (j != final.b + sign)
+        {
+            i = (int) (origin.a + (final.a - origin.a)*(j - origin.b)/((float) (final.b - origin.b)));
+            if (Cell.IsValid(i, j))
+            {
+                occup[i, j] = true;
+            }
+            j += sign;
+        }
+        return occup;
     }
 }
 
