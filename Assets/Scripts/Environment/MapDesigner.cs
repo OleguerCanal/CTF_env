@@ -41,7 +41,7 @@ public class MapDesigner
             walls.Add(w);
             occupancy = w.markOccupancy();
         }
-        printOccupancy();
+        // printOccupancy();
 
         // Sample 
         Cell root = new Cell(); // Random Valid cell
@@ -49,12 +49,11 @@ public class MapDesigner
 
         // Get accessible cells
         List<Cell> accessibleCells = ComputeAccessibility(root);
-        int accessibleCount = accessibleCells.Count;
 
         // Group map info
         MapDescription map = new MapDescription();
         map.startPos = root;
-        map.finishPos = accessibleCells[UnityEngine.Random.Range(2*accessibleCount/3, accessibleCount)];
+        map.finishPos = accessibleCells[UnityEngine.Random.Range(2*accessibleCells.Count/3, accessibleCells.Count)];
         accessibleCells.Remove(map.finishPos);
         map.walls = walls;
         
@@ -62,7 +61,7 @@ public class MapDesigner
         map.collectiblesPositions = new List<Cell>();
         for (int i = 0; i < numCollectibles; i++)
         {
-            Cell collectiblePos = accessibleCells[UnityEngine.Random.Range(accessibleCount/3, accessibleCount)];
+            Cell collectiblePos = accessibleCells[UnityEngine.Random.Range(accessibleCells.Count/3, accessibleCells.Count)];
             map.collectiblesPositions.Add(collectiblePos);
             accessibleCells.Remove(collectiblePos);
         }
@@ -71,7 +70,7 @@ public class MapDesigner
         map.enemiesPositions = new List<Cell>();
         for (int i = 0; i < numEnemies; i++)
         {
-            Cell enemyPos = accessibleCells[UnityEngine.Random.Range(accessibleCount/3, accessibleCount)];
+            Cell enemyPos = accessibleCells[UnityEngine.Random.Range(accessibleCells.Count/3, accessibleCells.Count)];
             map.enemiesPositions.Add(enemyPos);
             accessibleCells.Remove(enemyPos);
         }
@@ -111,7 +110,7 @@ public class MapDesigner
             }
         }
         
-        printAccessibility(root, visibility);
+        // printAccessibility(root, visibility);
 
         return accessibleCells;
     }
