@@ -12,7 +12,7 @@ public class CTFAgent : Agent
     private EnemiesManager enemiesManager;
     
     // Counters
-    private int maxFrames = 200;  // Time limit in seconds
+    private int maxFrames = 2000;  // Time limit in seconds
     private int frameCounter;
     private int episodeCounter;
 
@@ -23,11 +23,13 @@ public class CTFAgent : Agent
     private float collectableReward;
     private float enemyCloseReward;
     private float deathByEnemyReward;
+    private int levelDifficulty;
+    private int mapRepetitions;
 
     // Logger
     public bool log = false;
     public string logPath = "Assets/Resources/cmplx_completionist.txt";
-    private int logFrequency;
+    private int logFrequency = 100;
     private Logger analyticsLogger;
 
     void Start ()
@@ -35,12 +37,10 @@ public class CTFAgent : Agent
         rBody = GetComponent<Rigidbody>();
         gameManager = transform.parent.gameObject.GetComponent<GameManager>();
         enemiesManager = gameManager.enemiesHolder.GetComponent<EnemiesManager>();
-
-        logFrequency = (int) Academy.Instance.EnvironmentParameters.GetWithDefault("logFrequency", 1.0f);        
+        
+        // logFrequency = (int) Academy.Instance.EnvironmentParameters.GetWithDefault("logFrequency", 1.0f);        
         analyticsLogger = new Logger(logPath, logFrequency, log);
         episodeCounter = 0;
-
-        // gameManager.BuildMap(episodeCounter);
     }
 
     public override void OnEpisodeBegin()
@@ -52,9 +52,22 @@ public class CTFAgent : Agent
         collectableReward = Academy.Instance.EnvironmentParameters.GetWithDefault("collectableReward", 0.5f);
         enemyCloseReward = Academy.Instance.EnvironmentParameters.GetWithDefault("enemyCloseReward", 0.0f);
         deathByEnemyReward = Academy.Instance.EnvironmentParameters.GetWithDefault("deathByEnemyReward", -2.0f);
+        levelDifficulty = (int) Academy.Instance.EnvironmentParameters.GetWithDefault("levelDifficulty", 3.0f);
+        mapRepetitions = (int) Academy.Instance.EnvironmentParameters.GetWithDefault("mapRepetitions", 3.0f);
 
-        gameManager.DestroyMap();
-        gameManager.BuildMap(episodeCounter);
+        
+        if (episodeCounter % mapRepetitions == 0)
+        {
+            Debug.Log("New map");
+            gameManager.DestroyMap();
+            gameManager.BuildMap(levelDifficulty);
+        }
+        else
+        {
+            Debug.Log("Map reset");
+            gameManager.ResetMap();
+        }
+        
         // gameManager.ResetMap();
         
         frameCounter = 0;

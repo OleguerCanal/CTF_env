@@ -38,10 +38,12 @@ public class GameManager : MonoBehaviour
         mapParamDifficulty = new List<MapParameters>();
         mapParamDifficulty.Add(new MapParameters(0, 1, 0));
         mapParamDifficulty.Add(new MapParameters(0, 2, 0));
+        mapParamDifficulty.Add(new MapParameters(0, 2, 1));
         mapParamDifficulty.Add(new MapParameters(0, 4, 1));
         mapParamDifficulty.Add(new MapParameters(2, 4, 1));
         mapParamDifficulty.Add(new MapParameters(4, 4, 2));
         mapParamDifficulty.Add(new MapParameters(6, 4, 2));
+        mapParamDifficulty.Add(new MapParameters(8, 4, 3));
         mapParamDifficulty.Add(new MapParameters(10, 4, 2));
         mapParamDifficulty.Add(new MapParameters(10, 4, 4));
     }

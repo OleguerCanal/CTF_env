@@ -16,7 +16,7 @@ public class EnemyController : MonoBehaviour
     {
         gameManager = transform.parent.parent.gameObject.GetComponent<GameManager>();
         agents = Utilities.GetChildrenWithTag(this.transform.parent.parent.gameObject, "agent");
-        speed = Academy.Instance.EnvironmentParameters.GetWithDefault("enemySpeed", 0.03f);
+        speed = Academy.Instance.EnvironmentParameters.GetWithDefault("enemySpeed", 0.01f);
         initialPosition = this.transform.position;
     }
 
