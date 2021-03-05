@@ -6,8 +6,8 @@ using System;
 public class MapDesigner
 {
     // World dimensions
-    static public int rows = 40;
-    static public int cols = 40;
+    static public int rows = 30;
+    static public int cols = 30;
     static public float mapHeight = 70;
     static public float mapWidth = 70;
 
@@ -53,7 +53,7 @@ public class MapDesigner
         // Group map info
         MapDescription map = new MapDescription();
         map.startPos = root;
-        map.finishPos = accessibleCells[UnityEngine.Random.Range(2*accessibleCells.Count/3, accessibleCells.Count)];
+        map.finishPos = accessibleCells[UnityEngine.Random.Range(2*accessibleCells.Count/3, accessibleCells.Count-1)];
         accessibleCells.Remove(map.finishPos);
         map.walls = walls;
         
@@ -61,7 +61,7 @@ public class MapDesigner
         map.collectiblesPositions = new List<Cell>();
         for (int i = 0; i < numCollectibles; i++)
         {
-            Cell collectiblePos = accessibleCells[UnityEngine.Random.Range(accessibleCells.Count/3, accessibleCells.Count)];
+            Cell collectiblePos = accessibleCells[UnityEngine.Random.Range(accessibleCells.Count/3, accessibleCells.Count-1)];
             map.collectiblesPositions.Add(collectiblePos);
             accessibleCells.Remove(collectiblePos);
         }
@@ -70,7 +70,7 @@ public class MapDesigner
         map.enemiesPositions = new List<Cell>();
         for (int i = 0; i < numEnemies; i++)
         {
-            Cell enemyPos = accessibleCells[UnityEngine.Random.Range(accessibleCells.Count/3, accessibleCells.Count)];
+            Cell enemyPos = accessibleCells[UnityEngine.Random.Range(accessibleCells.Count/3, accessibleCells.Count-1)];
             map.enemiesPositions.Add(enemyPos);
             accessibleCells.Remove(enemyPos);
         }
