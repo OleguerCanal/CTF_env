@@ -2,12 +2,12 @@ behaviors:
   CTFAgentBehavior:
     trainer_type: ppo
     hyperparameters:
-      batch_size: 100  # Num experiences in each iteration of gradient descend
-      buffer_size: 6000  # Num experiences to be filled before updating weights
+      batch_size: 200  # Num experiences in each iteration of gradient descend
+      buffer_size: 10000  # Num experiences to be filled before updating weights
       learning_rate: 3.0e-4
       beta: 5.0e-4  # Weight of the entropy: If entropy drops too quickly, increase beta
       epsilon: 0.2  # How rapidly can the policy change
-      lambd: 0.99
+      lambd: 0.95
       num_epoch: 3
       learning_rate_schedule: linear
     network_settings:
@@ -15,14 +15,19 @@ behaviors:
       hidden_units: 250
       num_layers: 2
       memory:
-        memory_size: 150
-        sequence_length: 100
+        memory_size: 200
+        sequence_length: 200
     reward_signals:
       extrinsic:
         gamma: 0.99
         strength: 1.0
+      # curiosity:
+      #   strength: 0.02
+      #   gamma: 0.99
+      #   encoding_size: 256
+      #   learning_rate: 3.0e-4
     max_steps: 30e6 # Steps collected in one training per-behavior
-    time_horizon: 2000 # Steps collected per-agent added to buffer (if shorter than episode remaining value estimate is used)
+    time_horizon: 2500 # Steps collected per-agent added to buffer (if shorter than episode remaining value estimate is used)
     summary_freq: 10000
 
 
@@ -35,8 +40,8 @@ environment_parameters:
   enemyCloseReward: 0.0
   deathByEnemyReward: -2.0
 
-  mapRepetitions: 3  # Number of times to repeat the same map
-  enemySpeed: 0.01  # Number of times to repeat the same map
+  mapRepetitions: 10  # Number of times to repeat the same map
+  enemySpeed: 0.015  # Number of times to repeat the same map
 
 
   # Enemies velocity
@@ -47,7 +52,7 @@ environment_parameters:
           measure: reward
           behavior: CTFAgentBehavior
           signal_smoothing: true
-          min_lesson_length: 300
+          min_lesson_length: 500
           threshold: 0.4
         value: 0.0
       - name: Lesson1
@@ -55,7 +60,7 @@ environment_parameters:
           measure: reward
           behavior: CTFAgentBehavior
           signal_smoothing: true
-          min_lesson_length: 300
+          min_lesson_length: 500
           threshold: 0.4
           require_reset: true
         value: 1.0
@@ -64,7 +69,7 @@ environment_parameters:
           measure: reward
           behavior: CTFAgentBehavior
           signal_smoothing: true
-          min_lesson_length: 300
+          min_lesson_length: 500
           threshold: 0.4
           require_reset: true
         value: 2.0
@@ -73,7 +78,7 @@ environment_parameters:
           measure: reward
           behavior: CTFAgentBehavior
           signal_smoothing: true
-          min_lesson_length: 300
+          min_lesson_length: 500
           threshold: 0.4
           require_reset: true
         value: 3.0
@@ -82,7 +87,7 @@ environment_parameters:
           measure: reward
           behavior: CTFAgentBehavior
           signal_smoothing: true
-          min_lesson_length: 300
+          min_lesson_length: 500
           threshold: 0.4
           require_reset: true
         value: 4.0
@@ -91,7 +96,7 @@ environment_parameters:
           measure: reward
           behavior: CTFAgentBehavior
           signal_smoothing: true
-          min_lesson_length: 300
+          min_lesson_length: 500
           threshold: 0.4
           require_reset: true
         value: 5.0
@@ -100,7 +105,7 @@ environment_parameters:
           measure: reward
           behavior: CTFAgentBehavior
           signal_smoothing: true
-          min_lesson_length: 300
+          min_lesson_length: 500
           threshold: 0.4
           require_reset: true
         value: 6.0
@@ -109,7 +114,7 @@ environment_parameters:
           measure: reward
           behavior: CTFAgentBehavior
           signal_smoothing: true
-          min_lesson_length: 300
+          min_lesson_length: 500
           threshold: 0.4
           require_reset: true
         value: 7.0
@@ -118,7 +123,7 @@ environment_parameters:
           measure: reward
           behavior: CTFAgentBehavior
           signal_smoothing: true
-          min_lesson_length: 300
+          min_lesson_length: 500
           threshold: 0.4
           require_reset: true
         value: 8.0
@@ -127,7 +132,7 @@ environment_parameters:
           measure: reward
           behavior: CTFAgentBehavior
           signal_smoothing: true
-          min_lesson_length: 300
+          min_lesson_length: 500
           threshold: 0.4
           require_reset: true
         value: 9.0
