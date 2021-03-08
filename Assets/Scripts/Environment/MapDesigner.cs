@@ -6,8 +6,8 @@ using System;
 public class MapDesigner
 {
     // World dimensions
-    static public int rows = 30;
-    static public int cols = 30;
+    static public int rows = 27;
+    static public int cols = 27;
     static public float mapHeight = 70;
     static public float mapWidth = 70;
 
