@@ -36,23 +36,20 @@ public class GameManager : MonoBehaviour
 
         // Sorted difficulty: walls, collectibles, enemies
         mapParamDifficulty = new List<MapParameters>();
-        mapParamDifficulty.Add(new MapParameters(0, 1, 0));
-        mapParamDifficulty.Add(new MapParameters(0, 2, 0));
-        mapParamDifficulty.Add(new MapParameters(0, 2, 1));
-        mapParamDifficulty.Add(new MapParameters(0, 4, 1));
-        mapParamDifficulty.Add(new MapParameters(2, 4, 1));
-        mapParamDifficulty.Add(new MapParameters(4, 4, 2));
-        mapParamDifficulty.Add(new MapParameters(6, 4, 2));
-        mapParamDifficulty.Add(new MapParameters(8, 4, 3));
-        mapParamDifficulty.Add(new MapParameters(10, 4, 2));
-        mapParamDifficulty.Add(new MapParameters(10, 4, 4));
+        mapParamDifficulty.Add(new MapParameters(0, 1, 0));  // 0
+        mapParamDifficulty.Add(new MapParameters(0, 2, 0));  // 1
+        mapParamDifficulty.Add(new MapParameters(0, 2, 1));  // 2
+        mapParamDifficulty.Add(new MapParameters(0, 4, 1));  // 3
+        mapParamDifficulty.Add(new MapParameters(2, 4, 1));  // 4
+        mapParamDifficulty.Add(new MapParameters(4, 4, 2));  // 5
+        mapParamDifficulty.Add(new MapParameters(6, 4, 2));  // 6
+        mapParamDifficulty.Add(new MapParameters(8, 4, 3));  // 7
+        mapParamDifficulty.Add(new MapParameters(10, 4, 2));  // 8
+        mapParamDifficulty.Add(new MapParameters(10, 4, 4));  // 9
     }
     
     public void BuildMap(int difficulty)
     {
-        MapDesigner.mapWidth = 70;
-        MapDesigner.mapHeight = 70;
-
         // mapHolder.transform.Find("Ground").localScale = new Vector3(mapWidth, 1, mapHeight);
         // mapHolder.transform.Find("WallHolder").transform.Find("Border_1").localScale = new Vector3(1, 5, mapHeight);
         // mapHolder.transform.Find("WallHolder").transform.Find("Border_1").localPosition = new Vector3(mapWidth/2, 2, 0);
@@ -66,7 +63,8 @@ public class GameManager : MonoBehaviour
         // mapHolder.transform.Find("WallHolder").transform.Find("Border_4").localScale = new Vector3(1, 5, mapHeight);
         // mapHolder.transform.Find("WallHolder").transform.Find("Border_4").localPosition = new Vector3(mapWidth/2, 2, 0);
 
-        MapParameters mapParam = mapParamDifficulty[Mathf.Min(difficulty, mapParamDifficulty.Count - 1)];
+        difficulty = Mathf.Max(0, Mathf.Min(difficulty, mapParamDifficulty.Count - 1));
+        MapParameters mapParam = mapParamDifficulty[difficulty];
         map = mapDesigner.CreateMap(mapParam.numWalls, mapParam.numCollectibles, mapParam.numEnenmies);
         agent.transform.localPosition = new Vector3(map.startPos.x, 0.0f, map.startPos.z);
         finalGoal.transform.localPosition = new Vector3(map.finishPos.x, 0.0f, map.finishPos.z);
