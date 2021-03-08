@@ -12,7 +12,7 @@ public class CTFAgent : Agent
     private EnemiesManager enemiesManager;
     
     // Counters
-    private int maxFrames = 2000;  // Time limit in seconds
+    private int maxFrames = 3500;  // Time limit in seconds
     private int frameCounter;
     private int episodeCounter;
 
@@ -52,14 +52,15 @@ public class CTFAgent : Agent
         collectableReward = Academy.Instance.EnvironmentParameters.GetWithDefault("collectableReward", 0.5f);
         enemyCloseReward = Academy.Instance.EnvironmentParameters.GetWithDefault("enemyCloseReward", 0.0f);
         deathByEnemyReward = Academy.Instance.EnvironmentParameters.GetWithDefault("deathByEnemyReward", -2.0f);
-        levelDifficulty = (int) Academy.Instance.EnvironmentParameters.GetWithDefault("levelDifficulty", 3.0f);
-        mapRepetitions = (int) Academy.Instance.EnvironmentParameters.GetWithDefault("mapRepetitions", 3.0f);
+        levelDifficulty = (int) Academy.Instance.EnvironmentParameters.GetWithDefault("levelDifficulty", 10.0f);
+        mapRepetitions = (int) Academy.Instance.EnvironmentParameters.GetWithDefault("mapRepetitions", 1.0f);
 
         
         if (episodeCounter % mapRepetitions == 0)
         {
-            Debug.Log("New map");
+            Debug.Log("New map with difficulty: " + levelDifficulty);
             gameManager.DestroyMap();
+            // UnityEngine.Random.Range(levelDifficulty - 3, levelDifficulty)
             gameManager.BuildMap(levelDifficulty);
         }
         else
